@@ -8,6 +8,8 @@
 import SwiftUI
 
 struct ContentView: View {
+    @State private var unitSystem: UnitSystem = .metric
+    
     var body: some View {
         TabView {
             UnitConverterView()
@@ -19,9 +21,16 @@ struct ContentView: View {
                 .tabItem {
                     Label("다중 변환", systemImage: "square.grid.2x2")
                 }
+            
+            UnitSystemSelectorView()
+                .tabItem {
+                    Label("단위 설정", systemImage: "gearshape")
+                }
         }
+        .environment(\.unitSystem, $unitSystem)
     }
 }
+
 
 #Preview {
     ContentView()

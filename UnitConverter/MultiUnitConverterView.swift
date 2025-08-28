@@ -10,10 +10,26 @@ import SwiftUI
 struct MultiUnitConverterView: View {
     @State private var inputValue: Double = 1.0
     @State private var inputUnit: UnitLength = .meters
+    @Environment(\.unitSystem) private var unitSystem
     
-    private let outputUnits: [UnitLength] = [
-        .centimeters, .feet, .inches, .kilometers, .miles, .yards
-    ]
+    // 출력 단위 (단위 시스템에 따라 변환)
+    private var outputUnits: [UnitLength] {
+        switch unitSystem.wrappedValue {
+        case .metric:
+            return [.kilometers, .centimeters, .millimeters]
+        case .imperial:
+            return [.miles, .feet, .inches, .yards]
+        }
+    }
+    
+    private var inputCandidates: [UnitLength] {
+        switch unitSystem.wrappedValue {
+        case .metric:
+            return [.meters, .centimeters, .kilometers]
+        case .imperial:
+            return [.feet, .inches, .miles]
+        }
+    }
     
     var body: some View {
         NavigationView {
@@ -24,15 +40,14 @@ struct MultiUnitConverterView: View {
                         .textFieldStyle(RoundedBorderTextFieldStyle())
                     
                     Picker("단위", selection: $inputUnit) {
-                        Text("미터").tag(UnitLength.meters)
-                        Text("센티미터").tag(UnitLength.centimeters)
-                        Text("피트").tag(UnitLength.feet)
-                        Text("인치").tag(UnitLength.inches)
+                        ForEach(inputCandidates, id: \.self) { unit in
+                            Text(localizedUnitName(for: unit)).tag(unit)
+                        }
                     }
                 }
                 .padding()
                 
-                // 모든 단위로 변환 결과
+                // 변환 결과 리스트
                 List(outputUnits, id: \.self) { unit in
                     let measurement = Measurement(value: inputValue, unit: inputUnit)
                     let converted = measurement.converted(to: unit)
@@ -46,6 +61,10 @@ struct MultiUnitConverterView: View {
                 }
             }
             .navigationTitle("다중 단위 변환")
+            .onChange(of: unitSystem.wrappedValue) { _, _ in
+                // 단위 시스템 바뀌면 입력 단위 초기화
+                inputUnit = inputCandidates.first ?? .meters
+            }
         }
     }
     

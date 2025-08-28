@@ -6,6 +6,24 @@
 //
 
 import Foundation
+import SwiftUI
+
+enum UnitSystem {
+    case metric
+    case imperial
+}
+
+// MARK: - EnvironmentKey 확장
+private struct UnitSystemKey: EnvironmentKey {
+    static let defaultValue: Binding<UnitSystem> = .constant(.metric)
+}
+
+extension EnvironmentValues {
+    var unitSystem: Binding<UnitSystem> {
+        get { self[UnitSystemKey.self] }
+        set { self[UnitSystemKey.self] = newValue }
+    }
+}
 
 class UnitConverterViewModel: ObservableObject {
     @Published var inputValue: String = ""
